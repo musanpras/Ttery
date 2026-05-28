@@ -10,15 +10,16 @@ import SwiftUI
 struct MainTabView: View {
     var body: some View {
         TabView {
-            Tab("Home", systemImage: "house") {
-                HomeView()
-            }
-            
-            Tab("Market", systemImage: "storefront") {
-                Text("Market content")
-            }
+            HomeView()
+                .tabItem {
+                    Label("Home", systemImage: "house")
+                }
+
+            MarketView()
+                .tabItem {
+                    Label("Market", systemImage: "storefront")
+                }
         }
-        
     }
 }
 

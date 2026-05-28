@@ -8,24 +8,29 @@
 import SwiftUI
 
 struct EnergyBar: View {
+    let value: Double
+
+    private var clampedValue: Double {
+        min(max(value, 0), 1)
+    }
+
     var body: some View {
-        GeometryReader{ geo in
-            ZStack (alignment: .leading){
+        GeometryReader { geo in
+            ZStack(alignment: .leading) {
                 Capsule()
                     .fill(Color.black)
-                    .frame(width: 350)
-                    .shadow(radius: 10, x:0, y:10)
-             
+                    .frame(width: geo.size.width)
+                    .shadow(radius: 10, x: 0, y: 10)
+
                 Capsule()
                     .fill(Color.green)
-                    .frame(width: geo.size.width * 0.6)
-                
-                Text("10")
-                    
+                    .frame(width: geo.size.width * clampedValue)
+
+                Text("\(Int(clampedValue * 100))")
             }
         }
         .frame(height: 40)
-        .overlay(alignment: .leading){
+        .overlay(alignment: .leading) {
             Circle()
                 .fill(Color.white)
                 .overlay(
@@ -36,16 +41,11 @@ struct EnergyBar: View {
                     Circle().stroke(Color.black, lineWidth: 2)
                 )
                 .frame(width: 56, height: 56)
-                
-                       
         }
-        
         .padding(.leading, 4)
-       
     }
-    
 }
 
 #Preview {
-    EnergyBar()
+    EnergyBar(value: 0.6)
 }

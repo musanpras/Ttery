@@ -16,3 +16,8 @@ final class Item {
         self.timestamp = timestamp
     }
 }
+
+enum Tab {
+    case home
+    case market
+}
