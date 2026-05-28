@@ -107,7 +107,8 @@ struct MarketView: View {
                     .font(.system(size: 20, weight: .bold))
                     .foregroundStyle(.black)
                     .frame(width: 30, height: 30)
-                    .background(Circle().fill(.white))
+                    
+                    .background(Circle().fill(.white).shadow(color: .black, radius: 0, x: 0, y: 2))
                     .overlay(Circle().stroke(.black, lineWidth: 2))
                     .zIndex(1)
                     .offset(x: 20)
@@ -116,6 +117,9 @@ struct MarketView: View {
                     ZStack(alignment: .leading) {
                         Capsule()
                             .fill(.black)
+                        Capsule()
+                            .fill(.black)
+                            .offset(y: 2)
 
                         Capsule()
                             .fill(.yellow)
@@ -144,7 +148,7 @@ struct MarketView: View {
         .frame(height: 34)
         .background(
             RoundedRectangle(cornerRadius: 17)
-                .fill(.gray)
+                .fill(Color(.systemGray6))
                 .shadow(color: .black, radius: 0, x: 0, y: 4)
         )
         .overlay(

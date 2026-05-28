@@ -8,33 +8,33 @@ import SwiftUI
 import SwiftData
 
 struct HomeView: View {
-
+    
     @Environment(\.modelContext) private var context
-
+    
     @Query private var tasks: [TaskItem]
     @Query private var states: [DailyState]
-
+    
     private let maxSelectedTasks = 4
     private let columns = Array(repeating: GridItem(.flexible(), spacing: 0), count: 4)
-
+    
     var dailyState: DailyState? {
         states.first
     }
-
+    
     var selectedTasks: [TaskItem] {
         Array(tasks.filter { $0.isSelected }.prefix(maxSelectedTasks))
     }
-
+    
     private var energyValue: Double {
         guard let dailyState, dailyState.maxEnergy > 0 else { return 0 }
         return Double(dailyState.currentEnergy) / Double(dailyState.maxEnergy)
     }
-
+    
     var body: some View {
-
+        
         ZStack {
             HomeGridPaperBackground()
-
+            
             ScrollView {
                 VStack(spacing: 20) {
                     header
@@ -52,42 +52,70 @@ struct HomeView: View {
             createStateIfNeeded()
         }
     }
-
+    
     private var header: some View {
         ZStack(alignment: .leading) {
-            Button {
-            } label: {
-                Image(systemName: "info")
-                    .font(.system(size: 24, weight: .bold))
-                    .foregroundStyle(.black)
-                    .frame(width: 54, height: 54)
-                    .background(Circle().fill(.white).shadow(color: .black, radius: 0, x: 0, y: 4))
-                    .overlay(Circle().stroke(.black, lineWidth: 1))
-                    
-            }
-            .buttonStyle(.plain)
-
+            
             VStack(spacing: 8) {
                 Text("pick a task.")
                     .font(.system(size: 32, weight: .bold))
                     .foregroundStyle(.black)
-
+                
                 Text("focus with [mascot]")
                     .font(.system(size: 14))
                     .strikethrough()
                     .foregroundStyle(.gray)
             }
             .frame(maxWidth: .infinity)
+            
+            HStack{
+                
+                
+                Button {
+                } label: {
+                    Image(systemName: "info")
+                        .font(.system(size: 24, weight: .bold))
+                        .foregroundStyle(.black)
+                        .frame(width: 54, height: 54)
+                        .background(Circle().fill(.white).shadow(color: .black, radius: 0, x: 0, y: 4))
+                        .overlay(Circle().stroke(.black, lineWidth: 1))
+                    
+                }
+                .buttonStyle(.plain)
+                
+                Spacer()
+                
+                
+                Button {
+                } label: {
+                    Image(systemName: "checkmark")
+                        .font(.system(size: 24, weight: .bold))
+                        .foregroundStyle(.white)
+                        .frame(width: 54, height: 54)
+                        .background(Circle().fill(.blue).shadow(color: .black, radius: 0, x: 0, y: 4))
+                        .overlay(Circle().stroke(.black, lineWidth: 1))
+                    
+                }
+                .buttonStyle(.plain)
+                
+            }
         }
     }
-
+    
     private var mascotSection: some View {
         ZStack(alignment: .leading) {
-            StickMascotShape()
-                .stroke(.black.opacity(0.75), style: StrokeStyle(lineWidth: 3, lineCap: .round, lineJoin: .round))
+//            StickMascotShape()
+//                .stroke(.black.opacity(0.75), style: StrokeStyle(lineWidth: 3, lineCap: .round, lineJoin: .round))
+//                .frame(width: 170, height: 310)
+//                .frame(maxWidth: .infinity)
+            
+            Image("idle")
+                .resizable()
+                .scaledToFit()
                 .frame(width: 170, height: 310)
                 .frame(maxWidth: .infinity)
 
+            
             SpeechBubble()
                 .fill(.white)
                 .shadow(color: .black, radius: 0, x: 0, y: 4)
@@ -100,137 +128,141 @@ struct HomeView: View {
                     VStack(alignment: .leading, spacing: 4) {
                         Text("good job on doing")
                             .font(.system(size: 12))
-
+                        
                         Text("assignments today")
                             .font(.system(size: 13, weight: .bold))
                     }
-                    .foregroundStyle(.black)
-                    .padding(.horizontal, 12)
+                        .foregroundStyle(.black)
+                        .padding(.horizontal, 12)
                 )
         }
         .frame(height: 330)
     }
-
-    private var energyBar: some View {
-        HStack(spacing: 0) {
-            Image(systemName: "bolt.fill")
-                .font(.system(size: 28, weight: .bold))
-                .foregroundStyle(.black)
-                .frame(width: 42, height: 42)
-                .background(Circle().fill(.white))
-                .overlay(Circle().stroke(.black, lineWidth: 2))
-                .zIndex(1)
-
-            GeometryReader { proxy in
-                ZStack(alignment: .leading) {
-                    Capsule()
-                        .fill(.black)
-
-                    Capsule()
-                        .fill(Color(red: 0.2, green: 0.82, blue: 0.34))
-                        .frame(width: proxy.size.width * min(max(energyValue, 0), 1))
-                }
-            }
-            .frame(width: 160, height: 32)
-            .overlay(Capsule().stroke(.black, lineWidth: 1))
-            .offset(x: -20)
-        }
-        .frame(maxWidth: .infinity)
-    }
-
-    private var selectedTaskGrid: some View {
-        ZStack {
-            RoundedRectangle(cornerRadius: 16)
-                                .fill(Color(.systemBackground))
-                                .shadow(color: .black, radius: 0, x: 0, y: 8)
-            
-            LazyVGrid(columns: columns, spacing: 0) {
-                ForEach(selectedTasks) { task in
-                    Button {
-                        complete(task)
-                    } label: {
-                        ActivityCell(task: task)
-                    }
-                    .buttonStyle(.plain)
-                }
+    
+        private var energyBar: some View {
+            HStack(spacing: 0) {
+                Image(systemName: "bolt.fill")
+                    .font(.system(size: 28, weight: .bold))
+                    .foregroundStyle(.black)
+                    .frame(width: 42, height: 42)
+                    .background(Circle().fill(.white))
+                    .overlay(Circle().stroke(.black, lineWidth: 2))
+                    .background(Circle().fill(.white).shadow(color: .black, radius: 0, x: 0, y: 4))
+                    .zIndex(1)
                 
-                ForEach(0..<emptySelectedSlotCount, id: \.self) { _ in
-                    Color.white.opacity(0.35)
-                        .frame(maxWidth: .infinity, minHeight: 94)
-                        .border(.black, width: 0.5)
+                GeometryReader { proxy in
+                    ZStack(alignment: .leading) {
+                        Capsule()
+                            .fill(.black)
+                        
+                        Capsule()
+                            .fill(.black)
+                            .offset(y: 3)
+                        Capsule()
+                            .fill(Color(red: 0.2, green: 0.82, blue: 0.34))
+                            .frame(width: proxy.size.width * min(max(energyValue, 0), 1))
+                    }
                 }
+                .frame(width: 160, height: 32)
+                .overlay(Capsule().stroke(.black, lineWidth: 1))
+                .offset(x: -20)
             }
-            .clipShape(RoundedRectangle(cornerRadius: 12))
-            .overlay(
-                RoundedRectangle(cornerRadius: 12)
-                    .stroke(.black, lineWidth: 1)
+            .frame(maxWidth: .infinity)
+        }
+        
+        private var selectedTaskGrid: some View {
+            ZStack {
+                RoundedRectangle(cornerRadius: 16)
+                    .fill(Color(.systemBackground))
+                    .shadow(color: .black, radius: 0, x: 0, y: 8)
+                
+                LazyVGrid(columns: columns, spacing: 0) {
+                    ForEach(selectedTasks) { task in
+                        Button {
+                            complete(task)
+                        } label: {
+                            ActivityCell(task: task)
+                        }
+                        .buttonStyle(.plain)
+                    }
+                    
+                    ForEach(0..<emptySelectedSlotCount, id: \.self) { _ in
+                        Color.white.opacity(0.35)
+                            .frame(maxWidth: .infinity, minHeight: 94)
+                            .border(.black, width: 0.5)
+                    }
+                }
+                .clipShape(RoundedRectangle(cornerRadius: 12))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 12)
+                        .stroke(.black, lineWidth: 1)
+                )
+                .padding(.top, 6)
+            }
+        }
+        
+        private var emptySelectedSlotCount: Int {
+            max(0, maxSelectedTasks - selectedTasks.count)
+        }
+        
+        private var editInventoryLink: some View {
+            Text("edit inventory?")
+                .font(.system(size: 14))
+                .underline()
+                .foregroundStyle(.black)
+                .padding(.top, 10)
+        }
+        
+        func complete(_ task: TaskItem) {
+            
+            guard let state = dailyState else { return }
+            
+            if task.isDraining {
+                state.currentEnergy -= task.energyImpact
+            } else {
+                state.currentEnergy += task.energyImpact
+            }
+            
+            state.currentEnergy = max(
+                0,
+                min(state.currentEnergy, state.maxEnergy)
             )
-            .padding(.top, 6)
-        }
-    }
-
-    private var emptySelectedSlotCount: Int {
-        max(0, maxSelectedTasks - selectedTasks.count)
-    }
-
-    private var editInventoryLink: some View {
-        Text("edit inventory?")
-            .font(.system(size: 14))
-            .underline()
-            .foregroundStyle(.black)
-            .padding(.top, 10)
-    }
-
-    func complete(_ task: TaskItem) {
-
-        guard let state = dailyState else { return }
-
-        if task.isDraining {
-            state.currentEnergy -= task.energyImpact
-        } else {
-            state.currentEnergy += task.energyImpact
-        }
-
-        state.currentEnergy = max(
-            0,
-            min(state.currentEnergy, state.maxEnergy)
-        )
-
-        try? context.save()
-    }
-
-    func createStateIfNeeded() {
-
-        if states.isEmpty {
-
-            let state = DailyState()
-            context.insert(state)
-
+            
             try? context.save()
         }
+        
+        func createStateIfNeeded() {
+            
+            if states.isEmpty {
+                
+                let state = DailyState()
+                context.insert(state)
+                
+                try? context.save()
+            }
+        }
     }
-}
 
 private struct HomeGridPaperBackground: View {
     var body: some View {
         Canvas { context, size in
             let smallSpacing: CGFloat = 16
             let largeSpacing: CGFloat = 80
-
+            
             for x in stride(from: 0, through: size.width, by: smallSpacing) {
                 var path = Path()
                 path.move(to: CGPoint(x: x, y: 0))
                 path.addLine(to: CGPoint(x: x, y: size.height))
                 context.stroke(path, with: .color(Color.blue.opacity(0.08)), lineWidth: 1)
             }
-
+            
             for y in stride(from: 0, through: size.height, by: smallSpacing) {
                 var path = Path()
                 path.move(to: CGPoint(x: 0, y: y))
                 path.addLine(to: CGPoint(x: size.width, y: y))
                 context.stroke(path, with: .color(Color.blue.opacity(0.08)), lineWidth: 1)
             }
-
+            
             for y in stride(from: 0, through: size.height, by: largeSpacing) {
                 var path = Path()
                 path.move(to: CGPoint(x: 0, y: y))
@@ -242,63 +274,63 @@ private struct HomeGridPaperBackground: View {
         .ignoresSafeArea()
     }
 }
-
-private struct StickMascotShape: Shape {
-    func path(in rect: CGRect) -> Path {
-        var path = Path()
-
-        let centerX = rect.midX
-        let headRadius = rect.width * 0.16
-        let headCenter = CGPoint(x: centerX, y: rect.minY + headRadius + 8)
-        path.addEllipse(in: CGRect(
-            x: headCenter.x - headRadius,
-            y: headCenter.y - headRadius,
-            width: headRadius * 2,
-            height: headRadius * 2
-        ))
-
-        let neck = CGPoint(x: centerX, y: headCenter.y + headRadius)
-        let hip = CGPoint(x: centerX + 2, y: rect.minY + rect.height * 0.53)
-        path.move(to: neck)
-        path.addLine(to: hip)
-
-        path.move(to: CGPoint(x: centerX - 4, y: rect.minY + rect.height * 0.25))
-        path.addLine(to: CGPoint(x: centerX - 24, y: rect.minY + rect.height * 0.42))
-        path.addLine(to: CGPoint(x: centerX - 45, y: rect.minY + rect.height * 0.28))
-        path.addLine(to: CGPoint(x: centerX - 66, y: rect.minY + rect.height * 0.26))
-        path.addQuadCurve(
-            to: CGPoint(x: centerX - 58, y: rect.minY + rect.height * 0.29),
-            control: CGPoint(x: centerX - 66, y: rect.minY + rect.height * 0.31)
-        )
-
-        path.move(to: CGPoint(x: centerX + 4, y: rect.minY + rect.height * 0.25))
-        path.addLine(to: CGPoint(x: centerX + 24, y: rect.minY + rect.height * 0.46))
-        path.addLine(to: CGPoint(x: centerX + 52, y: rect.minY + rect.height * 0.27))
-        path.addLine(to: CGPoint(x: centerX + 73, y: rect.minY + rect.height * 0.28))
-        path.addQuadCurve(
-            to: CGPoint(x: centerX + 62, y: rect.minY + rect.height * 0.26),
-            control: CGPoint(x: centerX + 76, y: rect.minY + rect.height * 0.23)
-        )
-
-        path.move(to: hip)
-        path.addLine(to: CGPoint(x: centerX - 24, y: rect.minY + rect.height * 0.72))
-        path.addLine(to: CGPoint(x: centerX - 26, y: rect.minY + rect.height * 0.95))
-        path.addQuadCurve(
-            to: CGPoint(x: centerX - 44, y: rect.minY + rect.height * 0.98),
-            control: CGPoint(x: centerX - 46, y: rect.minY + rect.height * 0.96)
-        )
-
-        path.move(to: hip)
-        path.addLine(to: CGPoint(x: centerX + 22, y: rect.minY + rect.height * 0.72))
-        path.addLine(to: CGPoint(x: centerX + 30, y: rect.minY + rect.height * 0.94))
-        path.addQuadCurve(
-            to: CGPoint(x: centerX + 52, y: rect.minY + rect.height * 0.98),
-            control: CGPoint(x: centerX + 52, y: rect.minY + rect.height * 0.94)
-        )
-
-        return path
-    }
-}
+//
+//private struct StickMascotShape: Shape {
+//    func path(in rect: CGRect) -> Path {
+//        var path = Path()
+//        
+//        let centerX = rect.midX
+//        let headRadius = rect.width * 0.16
+//        let headCenter = CGPoint(x: centerX, y: rect.minY + headRadius + 8)
+//        path.addEllipse(in: CGRect(
+//            x: headCenter.x - headRadius,
+//            y: headCenter.y - headRadius,
+//            width: headRadius * 2,
+//            height: headRadius * 2
+//        ))
+//        
+//        let neck = CGPoint(x: centerX, y: headCenter.y + headRadius)
+//        let hip = CGPoint(x: centerX + 2, y: rect.minY + rect.height * 0.53)
+//        path.move(to: neck)
+//        path.addLine(to: hip)
+//        
+//        path.move(to: CGPoint(x: centerX - 4, y: rect.minY + rect.height * 0.25))
+//        path.addLine(to: CGPoint(x: centerX - 24, y: rect.minY + rect.height * 0.42))
+//        path.addLine(to: CGPoint(x: centerX - 45, y: rect.minY + rect.height * 0.28))
+//        path.addLine(to: CGPoint(x: centerX - 66, y: rect.minY + rect.height * 0.26))
+//        path.addQuadCurve(
+//            to: CGPoint(x: centerX - 58, y: rect.minY + rect.height * 0.29),
+//            control: CGPoint(x: centerX - 66, y: rect.minY + rect.height * 0.31)
+//        )
+//        
+//        path.move(to: CGPoint(x: centerX + 4, y: rect.minY + rect.height * 0.25))
+//        path.addLine(to: CGPoint(x: centerX + 24, y: rect.minY + rect.height * 0.46))
+//        path.addLine(to: CGPoint(x: centerX + 52, y: rect.minY + rect.height * 0.27))
+//        path.addLine(to: CGPoint(x: centerX + 73, y: rect.minY + rect.height * 0.28))
+//        path.addQuadCurve(
+//            to: CGPoint(x: centerX + 62, y: rect.minY + rect.height * 0.26),
+//            control: CGPoint(x: centerX + 76, y: rect.minY + rect.height * 0.23)
+//        )
+//        
+//        path.move(to: hip)
+//        path.addLine(to: CGPoint(x: centerX - 24, y: rect.minY + rect.height * 0.72))
+//        path.addLine(to: CGPoint(x: centerX - 26, y: rect.minY + rect.height * 0.95))
+//        path.addQuadCurve(
+//            to: CGPoint(x: centerX - 44, y: rect.minY + rect.height * 0.98),
+//            control: CGPoint(x: centerX - 46, y: rect.minY + rect.height * 0.96)
+//        )
+//        
+//        path.move(to: hip)
+//        path.addLine(to: CGPoint(x: centerX + 22, y: rect.minY + rect.height * 0.72))
+//        path.addLine(to: CGPoint(x: centerX + 30, y: rect.minY + rect.height * 0.94))
+//        path.addQuadCurve(
+//            to: CGPoint(x: centerX + 52, y: rect.minY + rect.height * 0.98),
+//            control: CGPoint(x: centerX + 52, y: rect.minY + rect.height * 0.94)
+//        )
+//        
+//        return path
+//    }
+//}
 
 private struct SpeechBubble: Shape {
     func path(in rect: CGRect) -> Path {
@@ -306,7 +338,7 @@ private struct SpeechBubble: Shape {
         let radius: CGFloat = 8
         let tailWidth: CGFloat = 18
         let tailHeight: CGFloat = 10
-
+        
         path.move(to: CGPoint(x: rect.minX + radius, y: rect.minY))
         path.addLine(to: CGPoint(x: rect.maxX - radius - tailWidth, y: rect.minY))
         path.addQuadCurve(
@@ -331,7 +363,7 @@ private struct SpeechBubble: Shape {
             to: CGPoint(x: rect.minX + radius, y: rect.minY),
             control: CGPoint(x: rect.minX, y: rect.minY)
         )
-
+        
         return path
     }
 }

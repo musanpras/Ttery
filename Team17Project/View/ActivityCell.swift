@@ -48,8 +48,9 @@ struct ActivityCell: View {
                 .minimumScaleFactor(0.65)
 
             HStack(spacing: 3) {
-                Image(systemName: "bolt.circle.fill")
+                Image(systemName: isDraining ? "bolt.circle.fill" : "bolt.circle")
                     .font(.system(size: 12))
+                
 
                 Text(energyText)
                     .font(.system(size: 12, weight: .medium))
