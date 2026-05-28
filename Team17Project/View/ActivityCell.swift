@@ -8,22 +8,57 @@
 import SwiftUI
 
 struct ActivityCell: View {
+    let icon: String
+    let title: String
+    let energyImpact: Int
+    let isDraining: Bool
+
+    init(
+        icon: String = "🚿",
+        title: String = "shower",
+        energyImpact: Int = 15,
+        isDraining: Bool = false
+    ) {
+        self.icon = icon
+        self.title = title
+        self.energyImpact = energyImpact
+        self.isDraining = isDraining
+    }
+
+    init(task: TaskItem) {
+        self.icon = task.icon
+        self.title = task.title
+        self.energyImpact = task.energyImpact
+        self.isDraining = task.isDraining
+    }
+
+    private var energyText: String {
+        "\(energyImpact)"
+    }
+
     var body: some View {
-        VStack(spacing: 4){
-            Text("🚿")
-                .font(.system(size: 50))
-            
-            Text("shower")
-                .font(.system(size: 20, weight: .bold))
-            
-//            if the
-            HStack{
-                Image(systemName: "bolt.circle")
-                Text("15")
+        VStack(spacing: 3) {
+            Text(icon)
+                .font(.system(size: 30))
+                .frame(height: 34)
+
+            Text(title)
+                .font(.system(size: 13, weight: .bold))
+                .lineLimit(1)
+                .minimumScaleFactor(0.65)
+
+            HStack(spacing: 3) {
+                Image(systemName: "bolt.circle.fill")
+                    .font(.system(size: 12))
+
+                Text(energyText)
+                    .font(.system(size: 12, weight: .medium))
             }
+            .foregroundStyle(.black)
         }
-        .frame(maxWidth: 100, minHeight: 140)
-        .border(Color.black, width: 0.5)
+        .frame(maxWidth: .infinity, minHeight: 94)
+        .background(.white.opacity(0.75))
+        .border(.black, width: 0.5)
     }
 }
 
