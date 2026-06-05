@@ -28,7 +28,15 @@ extension TaskItem{
             TaskItem(title: "socialize", energyImpact: 2, isDraining: false, icon: "🕺🏽"),
             TaskItem(title: "music", energyImpact: 1, isDraining: false, icon: "💿"),
             TaskItem(title: "sleep", energyImpact: 4, isDraining: false, icon: "😴"),
+
                        
+            
+            TaskItem(title: "read", energyImpact: 2, isDraining: false, icon: "📖"),
+            TaskItem(title: "art", energyImpact: 1, isDraining: false, icon: "🎨"),
+            TaskItem(title: "socialize", energyImpact: 2, isDraining: false, icon: "🕺🏽"),
+            TaskItem(title: "music", energyImpact: 1, isDraining: false, icon: "💿"),
+            TaskItem(title: "sleep", energyImpact: 4, isDraining: false, icon: "😴"),
+
         ]
     }
     

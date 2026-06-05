@@ -3,7 +3,6 @@
 //  Team17Project
 //
 //  Created by Muhammad Sandy Prastyo on 26/05/26.
-//
 
 import SwiftUI
 import SwiftData
@@ -23,7 +22,7 @@ struct MarketView: View {
     @State private var remainingEnergy: Int = 0
     @State private var navigateToHome = false
     @State private var navigateToMarket = false
-    @Binding var selectedTab: Tab  // ← tambah ini
+    @Binding var selectedTab: Tab
 
     private let maxSelectedTasks = 4
     private let columns = Array(repeating: GridItem(.flexible(), spacing: 0), count: 4)
@@ -71,14 +70,16 @@ struct MarketView: View {
                         header
                         filterPicker
                         activityGrid
+                       
                         selectedTaskGrid
                         proceedText()
                     }
                     .padding(.horizontal, 24)
                     .padding(.top, 18)
-                    .padding(.bottom, 100)
                 }
+                
                 .scrollDisabled(true)
+    
                 
                 if showingAdd {
                     addTaskPopup
@@ -98,6 +99,9 @@ struct MarketView: View {
             }
         }
     }
+    
+
+    
     
     private var addTaskPopup: some View {
         ZStack {
@@ -278,15 +282,16 @@ struct MarketView: View {
                 }
                 
             }
+            
             .frame(height: CGFloat(visibleRows) * 94)
             .scrollBounceBehavior(.basedOnSize)
             .clipShape(RoundedRectangle(cornerRadius: 12))
             .overlay(
                 RoundedRectangle(cornerRadius: 12)
                     .stroke(.black, lineWidth: 1)
-                
             )
         }
+        .padding(.bottom, dynamicBottomPadding)
     }
     
     private var visibleRows: Int {
@@ -294,6 +299,20 @@ struct MarketView: View {
        }
     
 
+    private var dynamicBottomPadding: CGFloat {
+        switch visibleRows {
+        case 3:
+            return -10
+        case 2:
+            return 90
+        case 1:
+            return 185
+
+        default:
+            return -97
+        }
+    }
+    
     private var addTaskButton: some View {
         Button {
             editingTask = nil
@@ -356,14 +375,16 @@ struct MarketView: View {
                         .border(.black, width: 0.5)
                 }
             }
+
             .clipShape(RoundedRectangle(cornerRadius: 12))
             .overlay(
                 RoundedRectangle(cornerRadius: 12)
                     .stroke(.black, lineWidth: 1)
             )
             
-            .padding(.top, 8)
+
         }
+        .padding(.top,100)
     }
     
     private var emptySelectedSlotCount: Int {
