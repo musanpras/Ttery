@@ -21,6 +21,10 @@ struct MarketView: View {
     @State private var editingTask: TaskItem?
     @State private var tempTask: TaskItem?
     @State private var remainingEnergy: Int = 0
+    @State private var navigateToHome = false
+    @State private var navigateToMarket = false
+    @Binding var selectedTab: Tab  // ← tambah ini
+
     private let maxSelectedTasks = 4
     private let columns = Array(repeating: GridItem(.flexible(), spacing: 0), count: 4)
     
@@ -84,6 +88,7 @@ struct MarketView: View {
                     warningPopup
                 }
             }
+         
             .toolbar(.hidden, for: .navigationBar)
             .onAppear {
                 remainingEnergy = Int(dailyState?.currentEnergy ?? 0)
@@ -288,10 +293,7 @@ struct MarketView: View {
            min(4, Int(ceil(Double(filteredTasks.count + 1) / 4.0)))
        }
     
-//    private var emptyActivitySlotCount: Int {
-//        max(0, maxSelectedTasks - pendingSelectedTasks.count)
-//    }
-    
+
     private var addTaskButton: some View {
         Button {
             editingTask = nil
@@ -371,6 +373,8 @@ struct MarketView: View {
     private func proceedText() -> some View {
         Button {
             proceedWithSelectedTasks()
+            selectedTab = .home
+            
         } label: {
             Text("\(pendingSelectedTasks.count)/\(maxSelectedTasks) tasks selected. proceed?")
                 .font(.system(size: 13))
@@ -382,6 +386,7 @@ struct MarketView: View {
         .buttonStyle(.plain)
         .disabled(pendingSelectedTasks.isEmpty)
     }
+    
     
     private func proceedWithSelectedTasks() {
         let pendingObjects = Set(pendingSelectedTasks.prefix(maxSelectedTasks).map { ObjectIdentifier($0) })
@@ -483,7 +488,7 @@ private enum EnergyFilter: CaseIterable, Hashable {
         container.mainContext.insert(task)
     }
     
-    return MarketView()
+    return MarketView(selectedTab: .constant(.market))
         .modelContainer(container)
     //    MarketView()
     //        .modelContainer(for: [TaskItem.self, DailyState.self], inMemory: true)
