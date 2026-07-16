@@ -17,12 +17,12 @@ final class SettingsViewModel {
     init(
         modelContext: ModelContext,
         notificationService: TaskReminderNotificationManager? = nil,
-        settingsPreferences: SettingsPreferences = SettingsPreferences(),
+        settingsPreferences: SettingsPreferences? = nil,
         calendar: Calendar = .current
     ) {
         self.dailyStateService = DailyStateService(modelContext: modelContext)
         self.notificationService = notificationService ?? .shared
-        self.settingsPreferences = settingsPreferences
+        self.settingsPreferences = settingsPreferences ?? SettingsPreferences()
         self.calendar = calendar
     }
 
