@@ -13,6 +13,9 @@ final class TaskReminderNotificationManager: NSObject, UNUserNotificationCenterD
 
     private let reminderPrefix = "taskReminder_"
     private let notificationCenter = UNUserNotificationCenter.current()
+    private let settingsPreferences = SettingsPreferences()
+    private let schedulingQueue = DispatchQueue(label: "com.ttery.taskReminderScheduling")
+    private var scheduleGeneration = 0
 
     let number: Int = Int.random(in: 1...2)
 
@@ -30,7 +33,13 @@ final class TaskReminderNotificationManager: NSObject, UNUserNotificationCenterD
         activeTaskTitle: String?,
         selectedTaskCount: Int
     ) {
-        guard state?.remindersEnabled ?? true else {
+        // DailyState is the authoritative value whenever it is available.
+        // UserDefaults remains a fallback for callers that do not have a state.
+        let remindersEnabled = state?.remindersEnabled
+            ?? settingsPreferences.remindersEnabled(fallback: true)
+
+        guard remindersEnabled else {
+            invalidateScheduling()
             removeAllReminders()
             return
         }
@@ -40,7 +49,8 @@ final class TaskReminderNotificationManager: NSObject, UNUserNotificationCenterD
             endMinute: state?.reminderEndMinute ?? DailyState.defaultReminderEndMinute,
             intervalMinutes: state?.reminderIntervalMinutes ?? DailyState.defaultReminderIntervalMinutes,
             activeTaskTitle: activeTaskTitle,
-            selectedTaskCount: selectedTaskCount
+            selectedTaskCount: selectedTaskCount,
+            generation: nextScheduleGeneration()
         )
     }
 
@@ -49,15 +59,19 @@ final class TaskReminderNotificationManager: NSObject, UNUserNotificationCenterD
         endMinute: Int,
         intervalMinutes: Int,
         activeTaskTitle: String?,
-        selectedTaskCount: Int
+        selectedTaskCount: Int,
+        generation: Int
     ) {
         guard startMinute < endMinute, intervalMinutes > 0 else {
+            invalidateScheduling()
             removeAllReminders()
             return
         }
 
         removeAllReminders { [weak self] in
             guard let self else { return }
+            guard self.isCurrentScheduleGeneration(generation) else { return }
+            guard self.settingsPreferences.remindersEnabled(fallback: true) else { return }
 
             let content = makeReminderContent(
                 activeTaskTitle: activeTaskTitle,
@@ -135,7 +149,27 @@ final class TaskReminderNotificationManager: NSObject, UNUserNotificationCenterD
                 .filter { $0.hasPrefix(self.reminderPrefix) }
 
             notificationCenter.removePendingNotificationRequests(withIdentifiers: identifiers)
+            notificationCenter.removeDeliveredNotifications(withIdentifiers: identifiers)
             completion?()
+        }
+    }
+
+    private func nextScheduleGeneration() -> Int {
+        schedulingQueue.sync {
+            scheduleGeneration += 1
+            return scheduleGeneration
+        }
+    }
+
+    private func invalidateScheduling() {
+        schedulingQueue.sync {
+            scheduleGeneration += 1
+        }
+    }
+
+    private func isCurrentScheduleGeneration(_ generation: Int) -> Bool {
+        schedulingQueue.sync {
+            scheduleGeneration == generation
         }
     }
 

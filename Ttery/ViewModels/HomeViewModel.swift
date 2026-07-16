@@ -27,8 +27,8 @@ final class HomeViewModel {
     }
 
     func onAppear(states: [DailyState], tasks: [TaskItem]) {
-        dailyStateService.ensureExists(in: states)
-        scheduleTaskReminder(tasks: tasks, dailyState: states.first)
+        let dailyState = dailyStateService.ensureExists(in: states)
+        scheduleTaskReminder(tasks: tasks, dailyState: dailyState)
     }
 
     func energyValue(for dailyState: DailyState?) -> Double {

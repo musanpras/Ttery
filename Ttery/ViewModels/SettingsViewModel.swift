@@ -45,7 +45,8 @@ final class SettingsViewModel {
     }
 
     func remindersEnabled(for state: DailyState?) -> Bool {
-        settingsPreferences.remindersEnabled(fallback: state?.remindersEnabled ?? true)
+        state?.remindersEnabled
+            ?? settingsPreferences.remindersEnabled(fallback: true)
     }
 
     func setRemindersEnabled(_ enabled: Bool, state: DailyState?) -> Bool {
@@ -58,6 +59,7 @@ final class SettingsViewModel {
 
     func setReminderHours(_ hours: Int, state: DailyState?) -> Bool {
         guard let state else { return true }
+        guard (1...3).contains(hours) else { return false }
         state.reminderHours = hours
         state.reminderIntervalMinutes = hours * 60
         dailyStateService.save()
@@ -97,7 +99,11 @@ final class SettingsViewModel {
     }
 
     func updateReminder(for state: DailyState) -> Bool {
-        guard state.reminderStartMinute < state.reminderEndMinute else { return false }
+        guard state.reminderStartMinute < state.reminderEndMinute,
+              (1...3).contains(state.reminderHours),
+              state.reminderIntervalMinutes == state.reminderHours * 60 else {
+            return false
+        }
 
         notificationService.scheduleReminders(
             for: state,

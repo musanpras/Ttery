@@ -31,11 +31,11 @@ final class MarketViewModel {
     }
 
     func onAppear(states: [DailyState], tasks: [TaskItem]) {
-        remainingEnergy = Int(states.first?.currentEnergy ?? 0)
-        dailyStateService.ensureExists(in: states)
+        let dailyState = dailyStateService.ensureExists(in: states)
+        remainingEnergy = Int(dailyState?.currentEnergy ?? 0)
         taskRepository.syncPendingFromCommitted(tasks: tasks)
         WidgetSyncService.update(
-            from: states.first,
+            from: dailyState,
             activeTaskTitle: nil,
             selectedTaskCount: pendingSelectedTasks(from: tasks).count
         )
